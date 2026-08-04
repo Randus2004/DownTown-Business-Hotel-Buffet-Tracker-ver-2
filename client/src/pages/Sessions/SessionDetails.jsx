@@ -17,7 +17,7 @@ import ReportCard from "../../components/session/ReportCard";
 import EndSessionCard from "../../components/session/EndSessionCard";
 
 
-import "../../css/sessionDetails.css";
+import "../../css/SessionDetails.css";
 
 function SessionDetails() {
   const { id } = useParams();
