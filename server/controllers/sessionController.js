@@ -24,13 +24,12 @@ export const createSession = async (req, res) => {
       count + 1
     ).padStart(3, "0")}`;
 
-    const session = await Session.create({
-      buffetName,
-      mealType,
-      buffetDate,
-      sessionCode,
-      uploadedBy: req.user._id,
-    });
+const session = await Session.create({
+  buffetName,
+  mealType,
+  buffetDate,
+  sessionCode,
+});
 
     res.status(201).json(session);
   } catch (error) {
@@ -43,12 +42,15 @@ export const createSession = async (req, res) => {
 // Get All Sessions
 export const getSessions = async (req, res) => {
   try {
-    const sessions = await Session.find()
-      .populate("uploadedBy", "name")
-      .sort({ createdAt: -1 });
+    const sessions = await Session.find().sort({
+      createdAt: -1,
+    });
 
     res.json(sessions);
   } catch (error) {
+    console.log("GET SESSIONS ERROR");
+    console.error(error);
+
     res.status(500).json({
       message: error.message,
     });

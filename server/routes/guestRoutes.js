@@ -1,21 +1,16 @@
 import express from "express";
+
 import {
   getGuests,
   updateGuestStatus,
 } from "../controllers/guestController.js";
 
-import { protect } from "../middleware/authMiddleware.js";
-import { authorize } from "../middleware/roleMiddleware.js";
-
 const router = express.Router();
 
-router.get("/:sessionId", protect, getGuests);
+// Get Guests
+router.get("/:sessionId", getGuests);
 
-router.patch(
-  "/:guestId/status",
-  protect,
-  authorize("staff", "admin", "reception"),
-  updateGuestStatus
-);
+// Update Guest Status
+router.patch("/:guestId/status", updateGuestStatus);
 
 export default router;

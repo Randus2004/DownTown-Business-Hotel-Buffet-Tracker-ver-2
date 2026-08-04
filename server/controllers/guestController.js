@@ -56,21 +56,19 @@ if (session.status === "Closed") {
 
     guest.claimed = claimed;
 
-    if (claimed) {
-      guest.claimedBy = req.user._id;
-      guest.claimedAt = new Date();
+if (claimed) {
+  guest.claimedAt = new Date();
 
-      await Session.findByIdAndUpdate(guest.sessionId, {
-        $inc: { claimedGuests: 1 },
-      });
-    } else {
-      guest.claimedBy = null;
-      guest.claimedAt = null;
+  await Session.findByIdAndUpdate(guest.sessionId, {
+    $inc: { claimedGuests: 1 },
+  });
+} else {
+  guest.claimedAt = null;
 
-      await Session.findByIdAndUpdate(guest.sessionId, {
-        $inc: { claimedGuests: -1 },
-      });
-    }
+  await Session.findByIdAndUpdate(guest.sessionId, {
+    $inc: { claimedGuests: -1 },
+  });
+}
 
     await guest.save();
 

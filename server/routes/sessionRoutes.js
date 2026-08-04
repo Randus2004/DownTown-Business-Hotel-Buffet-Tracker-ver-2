@@ -1,4 +1,5 @@
 import express from "express";
+
 import {
   createSession,
   getSessions,
@@ -7,47 +8,21 @@ import {
   endSession,
 } from "../controllers/sessionController.js";
 
-import { protect } from "../middleware/authMiddleware.js";
-import { authorize } from "../middleware/roleMiddleware.js";
-
 const router = express.Router();
 
 // Create Session
-router.post(
-  "/",
-  protect,
-  authorize("admin", "reception"),
-  createSession
-);
+router.post("/", createSession);
 
 // Get All Sessions
-router.get(
-  "/",
-  protect,
-  authorize("admin", "reception"),
-  getSessions
-);
+router.get("/", getSessions);
 
 // Get Session by Code (Staff)
-router.get(
-  "/code/:sessionCode",
-  protect,
-  getSessionByCode
-);
+router.get("/code/:sessionCode", getSessionByCode);
 
 // Get Single Session
-router.get(
-  "/:id",
-  protect,
-  getSession
-);
+router.get("/:id", getSession);
 
 // End Session
-router.patch(
-  "/:id/end",
-  protect,
-  authorize("admin", "reception"),
-  endSession
-);
+router.patch("/:id/end", endSession);
 
 export default router;

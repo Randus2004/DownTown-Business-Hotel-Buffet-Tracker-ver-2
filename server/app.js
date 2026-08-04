@@ -1,8 +1,6 @@
 import express from "express";
 import cors from "cors";
 
-import authRoutes from "./routes/authRoutes.js";
-import testRoutes from "./routes/testRoutes.js";
 import sessionRoutes from "./routes/sessionRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import guestRoutes from "./routes/guestRoutes.js";
@@ -15,8 +13,6 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use("/api/test", testRoutes);
-app.use("/api/auth", authRoutes);
 app.use("/api/sessions", sessionRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/guests", guestRoutes);

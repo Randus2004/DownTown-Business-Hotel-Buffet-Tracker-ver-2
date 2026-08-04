@@ -51,11 +51,6 @@ const guestSchema = new mongoose.Schema(
       index: true,
     },
 
-    claimedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      default: null,
-    },
 
     claimedAt: {
       type: Date,
