@@ -1,0 +1,49 @@
+.guest-list{
+    margin-top:30px;
+}
+
+.room-card{
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    margin-bottom:20px;
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.room-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+.room-header h3{
+    color:#1e293b;
+}
+
+.room-header span{
+    color:#64748b;
+}
+
+.guest-item{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    padding:12px 0;
+    border-top:1px solid #eee;
+    cursor:pointer;
+}
+
+.guest-item input{
+    width:22px;
+    height:22px;
+}
+
+.guest-item.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.guest-item input:disabled {
+  cursor: not-allowed;
+}

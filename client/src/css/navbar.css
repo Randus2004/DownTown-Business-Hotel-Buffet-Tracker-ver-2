@@ -1,0 +1,32 @@
+.navbar {
+  background: white;
+  padding: 18px 40px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar-left h2 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 28px;
+}
+
+.navbar-left p {
+  margin-top: 5px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.navbar-right {
+  color: #475569;
+  font-size: 15px;
+  font-weight: 600;
+}

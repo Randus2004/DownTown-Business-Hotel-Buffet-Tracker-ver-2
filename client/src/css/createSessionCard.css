@@ -1,0 +1,32 @@
+.create-session-card {
+  background: white;
+  border: 2px dashed #cbd5e1;
+  border-radius: 16px;
+
+  padding: 30px;
+  margin-bottom: 30px;
+
+  text-align: center;
+
+  cursor: pointer;
+
+  transition: .2s;
+}
+
+.create-session-card:hover {
+  border-color: #4f46e5;
+  background: #f8faff;
+}
+
+.plus {
+  font-size: 40px;
+  color: #4f46e5;
+}
+
+.create-session-card h3 {
+  margin: 15px 0 10px;
+}
+
+.create-session-card p {
+  color: #64748b;
+}

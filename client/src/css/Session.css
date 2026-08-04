@@ -1,0 +1,21 @@
+.status {
+  padding: 6px 15px;
+  border-radius: 30px;
+  color: white;
+  font-size: 14px;
+}
+
+.open {
+  background: #16a34a;
+}
+
+.closed {
+  background: #dc2626;
+}
+
+.session-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 15px;
+}
