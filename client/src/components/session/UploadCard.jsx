@@ -5,6 +5,7 @@ import "../../css/uploadCard.css";
 function UploadCard({
   session,
   onUploadSuccess,
+  onAddUnassigned,
 }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -35,11 +36,10 @@ function UploadCard({
       setSelectedFile(null);
 
       onUploadSuccess?.();
-
     } catch (err) {
       alert(
         err.response?.data?.message ||
-        "Upload failed."
+          "Upload failed."
       );
     } finally {
       setLoading(false);
@@ -48,7 +48,6 @@ function UploadCard({
 
   return (
     <div className="action-card">
-
       <h3>📤 Upload Guest List</h3>
 
       <input
@@ -60,21 +59,34 @@ function UploadCard({
         }
       />
 
-      {selectedFile && (
-        <p>{selectedFile.name}</p>
-      )}
+      {selectedFile && <p>{selectedFile.name}</p>}
 
-      <button
-        onClick={handleUpload}
-        disabled={loading || isClosed}
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          marginTop: "10px",
+        }}
       >
-        {isClosed
-          ? "Session Closed"
-          : loading
-          ? "Uploading..."
-          : "Upload Guests"}
-      </button>
+        <button
+          onClick={handleUpload}
+          disabled={loading || isClosed}
+        >
+          {isClosed
+            ? "Session Closed"
+            : loading
+            ? "Uploading..."
+            : "Upload Guests"}
+        </button>
 
+        <button
+          type="button"
+          onClick={onAddUnassigned}
+          disabled={isClosed}
+        >
+          + Add Unassigned
+        </button>
+      </div>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import fs from "fs";
 
 import Guest from "../models/Guest.js";
 import Session from "../models/Session.js";
+import UnassignedGuest from "../models/UnassignedGuest.js";
 
 import { parseGuestExcel } from "../utils/excelParser.js";
 
@@ -15,11 +16,14 @@ export const uploadGuests = async (req, res) => {
       });
     }
 
-    // Check if session exists
+    //---------------------------------------
+    // Check Session
+    //---------------------------------------
+
     const session = await Session.findById(sessionId);
 
     if (!session) {
-      if (req.file && fs.existsSync(req.file.path)) {
+      if (fs.existsSync(req.file.path)) {
         fs.unlinkSync(req.file.path);
       }
 
@@ -28,73 +32,150 @@ export const uploadGuests = async (req, res) => {
       });
     }
 
-    // Prevent upload if session is closed
-if (session.status === "Closed") {
-  fs.unlinkSync(req.file.path);
+    if (session.status === "Closed") {
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
 
-  return res.status(400).json({
-    message: "This buffet session has been closed. Guest upload is no longer allowed.",
-  });
-}
+      return res.status(400).json({
+        message:
+          "This buffet session has been closed. Guest upload is no longer allowed.",
+      });
+    }
 
+    //---------------------------------------
     // Parse Excel
-    const guests = parseGuestExcel(req.file.path);
+    //---------------------------------------
 
-    // Prevent re-upload after claims have started
+    const {
+      guests,
+      unassignedGuests,
+    } = parseGuestExcel(req.file.path);
+
+    //---------------------------------------
+    // Prevent Upload After Claims
+    //---------------------------------------
+
     const claimedCount = await Guest.countDocuments({
       sessionId,
       claimed: true,
     });
 
     if (claimedCount > 0) {
-      if (req.file && fs.existsSync(req.file.path)) {
+      if (fs.existsSync(req.file.path)) {
         fs.unlinkSync(req.file.path);
       }
 
       return res.status(400).json({
         message:
-          "This session already has claimed guests. Reset or create a new session before uploading another Excel.",
+          "Guests have already been claimed. Reset or create a new session.",
       });
     }
 
-    // Remove existing guests
+    //---------------------------------------
+    // Delete Previous Guests
+    //---------------------------------------
+
     await Guest.deleteMany({
       sessionId,
     });
 
-    // Prepare guest documents
+    await UnassignedGuest.deleteMany({
+      sessionId,
+    });
+
+    //---------------------------------------
+    // Prepare Documents
+    //---------------------------------------
+
     const guestDocs = guests.map((guest) => ({
       sessionId,
+
       roomNo: guest.roomNo,
+
       guestName: guest.guestName,
+
       guestNumber: guest.guestNumber,
+
       generated: guest.generated,
+
       claimed: false,
     }));
 
-    // Save guests
-    await Guest.insertMany(guestDocs);
+    const unassignedDocs =
+      unassignedGuests.map((guest) => ({
+        sessionId,
 
-    // Update session statistics
-    session.totalGuests = guestDocs.length;
+        guestName: guest.guestName,
+
+        guestNumber: guest.guestNumber,
+
+        generated: guest.generated,
+
+        claimed: false,
+      }));
+
+    //---------------------------------------
+    // Save
+    //---------------------------------------
+
+    if (guestDocs.length) {
+      await Guest.insertMany(guestDocs);
+    }
+
+    if (unassignedDocs.length) {
+      await UnassignedGuest.insertMany(
+        unassignedDocs
+      );
+    }
+
+    //---------------------------------------
+    // Update Session
+    //---------------------------------------
+
+    session.totalGuests =
+      guestDocs.length +
+      unassignedDocs.length;
+
     session.claimedGuests = 0;
 
     await session.save();
 
-    // Delete uploaded file
-    if (req.file && fs.existsSync(req.file.path)) {
+    //---------------------------------------
+    // Delete Uploaded File
+    //---------------------------------------
+
+    if (fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
 
+    //---------------------------------------
+    // Response
+    //---------------------------------------
+
     res.status(201).json({
       success: true,
-      message: "Guests imported successfully",
-      totalGuests: guestDocs.length,
+
+      message:
+        "Guests imported successfully",
+
+      assignedGuests:
+        guestDocs.length,
+
+      unassignedGuests:
+        unassignedDocs.length,
+
+      totalGuests:
+        guestDocs.length +
+        unassignedDocs.length,
     });
 
   } catch (error) {
 
-    if (req.file && fs.existsSync(req.file.path)) {
+    if (
+      req.file &&
+      fs.existsSync(req.file.path)
+    ) {
       fs.unlinkSync(req.file.path);
     }
 

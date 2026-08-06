@@ -6,16 +6,21 @@ import SessionStats from "../../components/session/SessionStats";
 import UploadCard from "../../components/session/UploadCard";
 import StaffAccessCard from "../../components/session/StaffAccessCard";
 import GuestList from "../../components/guest/GuestList";
+import SearchBar from "../../components/guest/SearchBar";
+import ReportCard from "../../components/session/ReportCard";
+import EndSessionCard from "../../components/session/EndSessionCard";
+import AddUnassignedModal from "../../components/session/AddUnassignedModal";
 
 import { getSession } from "../../services/sessionService";
 import {
   getGuests,
   updateGuestStatus,
 } from "../../services/guestService";
-import SearchBar from "../../components/guest/SearchBar";
-import ReportCard from "../../components/session/ReportCard";
-import EndSessionCard from "../../components/session/EndSessionCard";
 
+import {
+  getUnassignedGuests,
+  updateUnassignedGuestStatus,
+} from "../../services/unassignedService";
 
 import "../../css/SessionDetails.css";
 
@@ -25,19 +30,19 @@ function SessionDetails() {
   const [session, setSession] = useState(null);
   const [guests, setGuests] = useState([]);
   const [search, setSearch] = useState("");
+  const [showAddModal, setShowAddModal] = useState(false);
 
-useEffect(() => {
-  loadSession();
-  loadGuests();
-
-  const interval = setInterval(() => {
+  useEffect(() => {
     loadSession();
     loadGuests();
-  }, 5000);
 
-  return () => clearInterval(interval);
+    const interval = setInterval(() => {
+      loadSession();
+      loadGuests();
+    }, 5000);
 
-}, [id]);
+    return () => clearInterval(interval);
+  }, [id]);
 
   const loadSession = async () => {
     try {
@@ -50,88 +55,131 @@ useEffect(() => {
 
   const loadGuests = async () => {
     try {
-      const res = await getGuests(id);
-      setGuests(res.data);
+      const [guestRes, unassignedRes] = await Promise.all([
+        getGuests(id),
+        getUnassignedGuests(id),
+      ]);
+
+      const mergedGuests = [
+        ...guestRes.data,
+
+        ...unassignedRes.data.map((guest) => ({
+          ...guest,
+          roomNo: "",
+        })),
+      ];
+
+      setGuests(mergedGuests);
+
     } catch (err) {
       console.log(err);
     }
   };
 
- const handleToggle = async (guest) => {
-  try {
-    await updateGuestStatus(
-      guest._id,
-      !guest.claimed
-    );
+  const handleToggle = async (guest) => {
+    try {
 
-    // Refresh guests and stats
-    await loadGuests();
-    await loadSession();
+      if (guest.roomNo === "") {
+        await updateUnassignedGuestStatus(
+          guest._id,
+          !guest.claimed
+        );
+      } else {
+        await updateGuestStatus(
+          guest._id,
+          !guest.claimed
+        );
+      }
 
-  } catch (error) {
-    console.error(error);
+      await loadGuests();
+      await loadSession();
 
-    alert(
-      error.response?.data?.message ||
-      "Failed to update guest."
-    );
-  }
-};
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        error.response?.data?.message ||
+          "Failed to update guest."
+      );
+    }
+  };
 
   if (!session) {
     return <h2>Loading...</h2>;
   }
 
+  const filteredGuests = guests.filter((guest) => {
+    const keyword = search.toLowerCase();
+
+    return (
+      (guest.roomNo || "")
+        .toLowerCase()
+        .includes(keyword) ||
+      guest.guestName
+        .toLowerCase()
+        .includes(keyword)
+    );
+  });
+
   return (
     <div className="session-page">
+
       <SessionHeader session={session} />
 
       <SessionStats session={session} />
 
       <div className="action-grid">
 
-<UploadCard
-  session={session}
-  onUploadSuccess={() => {
-    loadSession();
-    loadGuests();
-  }}
-/>
+        <UploadCard
+          session={session}
+          onUploadSuccess={() => {
+            loadSession();
+            loadGuests();
+          }}
+          onAddUnassigned={() =>
+            setShowAddModal(true)
+          }
+        />
 
         <StaffAccessCard session={session} />
+
         <ReportCard sessionId={id} />
+
         <EndSessionCard
-  session={session}
-  onSessionEnded={() => {
-    loadSession();
-    loadGuests();
-  }}
-/>
+          session={session}
+          onSessionEnded={() => {
+            loadSession();
+            loadGuests();
+          }}
+        />
+
       </div>
 
-    <SearchBar
-    search={search}
-    setSearch={setSearch}
-/>
+      <SearchBar
+        search={search}
+        setSearch={setSearch}
+      />
 
-<GuestList
-  guests={guests.filter((guest) => {
-    const keyword = search.toLowerCase();
+      <GuestList
+        guests={filteredGuests}
+        onToggle={handleToggle}
+        disabled={session.status === "Closed"}
+      />
 
-    return (
-      guest.roomNo.toLowerCase().includes(keyword) ||
-      guest.guestName.toLowerCase().includes(keyword)
-    );
-  })}
-  onToggle={handleToggle}
-  disabled={session.status === "Closed"}
-/>
-
+      <AddUnassignedModal
+        open={showAddModal}
+        sessionId={session._id}
+        onClose={() =>
+          setShowAddModal(false)
+        }
+        onSuccess={() => {
+          loadGuests();
+          loadSession();
+        }}
+      />
 
     </div>
   );
-
-
 }
 
 export default SessionDetails;

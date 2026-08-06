@@ -5,10 +5,17 @@ function RoomCard({
   onToggle,
   disabled = false,
 }) {
+  const isUnassigned =
+    room.roomNo === "UNASSIGNED";
+
   return (
     <div className="room-card">
       <div className="room-header">
-        <h3>Room {room.roomNo}</h3>
+        <h3>
+          {isUnassigned
+            ? "⚠️ Unassigned Guests"
+            : `Room ${room.roomNo}`}
+        </h3>
 
         <span>PAX : {room.guests.length}</span>
       </div>

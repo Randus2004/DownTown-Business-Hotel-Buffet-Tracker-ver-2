@@ -10,104 +10,147 @@ export const parseGuestExcel = (filePath) => {
     defval: "",
   });
 
-  const headerIndex = findHeaderRow(rows);
+  //---------------------------------------
+  // Find Header Row
+  //---------------------------------------
+
+  let headerIndex = -1;
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i].map((cell) =>
+      String(cell).trim()
+    );
+
+    if (
+      row.includes("Plan") &&
+      row.includes("Room No") &&
+      row.includes("Guest")
+    ) {
+      headerIndex = i;
+      break;
+    }
+  }
 
   if (headerIndex === -1) {
-    throw new Error(
-      "Could not find Room, Guest and PAX columns."
-    );
+    throw new Error("Unable to find Guest Table.");
   }
 
-  const indexes = getIndexes(rows[headerIndex]);
+  //---------------------------------------
+  // Column Indexes
+  //---------------------------------------
+
+  const headers = rows[headerIndex].map((h) =>
+    String(h).trim()
+  );
+
+  const roomCol = headers.findIndex((h) =>
+    h.includes("Room")
+  );
+
+  const guestCol = headers.findIndex((h) =>
+    h.includes("Guest")
+  );
+
+  const paxCol = headers.findIndex((h) =>
+    h.includes("Pax")
+  );
 
   if (
-    indexes.room === -1 ||
-    indexes.guest === -1 ||
-    indexes.pax === -1
+    roomCol === -1 ||
+    guestCol === -1 ||
+    paxCol === -1
   ) {
-    throw new Error(
-      "Required columns (Room, Guest, PAX) are missing."
-    );
+    throw new Error("Required columns not found.");
   }
 
+  //---------------------------------------
+  // Guests
+  //---------------------------------------
+
   const guests = [];
+  const unassignedGuests = [];
+
+  let foundFirstRoom = false;
 
   for (let i = headerIndex + 1; i < rows.length; i++) {
     const row = rows[i];
 
-    const roomNo = String(row[indexes.room] ?? "").trim();
-    const guestName = String(row[indexes.guest] ?? "")
-  .replace(/,+$/, "")
-  .trim();
+    const guestName = String(
+      row[guestCol] ?? ""
+    )
+      .replace(/,+$/, "")
+      .trim();
+
+    if (!guestName) continue;
+
+    const room = String(
+      row[roomCol] ?? ""
+    ).trim();
 
     const pax = Math.max(
-      Number(row[indexes.pax]) || 1,
+      Number(row[paxCol]) || 1,
       1
     );
 
-    if (roomNo === "" || guestName === "") {
-      continue;
+    // First room encountered
+    if (room !== "") {
+      foundFirstRoom = true;
     }
 
-    // Original Guest
-    guests.push({
-      roomNo,
-      guestName,
-      guestNumber: 1,
-      generated: false,
-    });
+    const target = foundFirstRoom
+      ? guests
+      : unassignedGuests;
 
-    // Generated Guests
-    for (let g = 2; g <= pax; g++) {
-      guests.push({
-        roomNo,
-        guestName: `Guest ${g}`,
-        guestNumber: g,
-        generated: true,
+    for (let guestNo = 1; guestNo <= pax; guestNo++) {
+      target.push({
+        roomNo: room,
+        guestName:
+          guestNo === 1
+            ? guestName
+            : `Guest ${guestNo}`,
+        guestNumber: guestNo,
+        generated: guestNo > 1,
       });
     }
   }
 
-  guests.sort((a, b) => {
-    const roomCompare =
-      Number(a.roomNo) - Number(b.roomNo);
+  //---------------------------------------
+  // Sort Assigned Guests
+  //---------------------------------------
 
-    if (roomCompare !== 0) return roomCompare;
+  guests.sort((a, b) => {
+    const roomA = Number(a.roomNo);
+    const roomB = Number(b.roomNo);
+
+    if (!isNaN(roomA) && !isNaN(roomB)) {
+      if (roomA !== roomB) {
+        return roomA - roomB;
+      }
+    }
 
     return a.guestNumber - b.guestNumber;
   });
 
-  return guests;
-};
+  //---------------------------------------
+  // Debug
+  //---------------------------------------
 
-const findHeaderRow = (rows) => {
-  for (let i = 0; i < rows.length; i++) {
-    const row = rows[i].map((c) =>
-      String(c).toLowerCase().trim()
-    );
-
-    const hasRoom = row.some((c) => c.includes("room"));
-    const hasGuest = row.some((c) => c.includes("guest"));
-    const hasPax = row.some((c) => c.includes("pax"));
-
-    if (hasRoom && hasGuest && hasPax) {
-      return i;
-    }
-  }
-
-  return -1;
-};
-
-const getIndexes = (header) => {
-  const lower = header.map((h) =>
-    String(h).toLowerCase().trim()
+  console.log(
+    "Assigned Guests:",
+    guests.length
   );
 
+  console.log(
+    "Unassigned Guests:",
+    unassignedGuests.length
+  );
+
+  //---------------------------------------
+  // Return
+  //---------------------------------------
+
   return {
-    room: lower.findIndex((h) => h.includes("room")),
-
-    guest: lower.findIndex((h) => h.includes("guest")),
-
-    pax: lower.findIndex((h) => h.includes("pax")),
+    guests,
+    unassignedGuests,
   };
 };
