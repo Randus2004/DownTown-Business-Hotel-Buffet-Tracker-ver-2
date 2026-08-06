@@ -1,4 +1,5 @@
 import fs from "fs";
+import mongoose from "mongoose";
 
 import Guest from "../models/Guest.js";
 import Session from "../models/Session.js";
@@ -85,7 +86,7 @@ export const uploadGuests = async (req, res) => {
     });
 
     //---------------------------------------
-    // Prepare Documents
+    // Assigned Guests
     //---------------------------------------
 
     const guestDocs = guests.map((guest) => ({
@@ -102,9 +103,26 @@ export const uploadGuests = async (req, res) => {
       claimed: false,
     }));
 
-    const unassignedDocs =
-      unassignedGuests.map((guest) => ({
+    //---------------------------------------
+    // Unassigned Guests
+    //---------------------------------------
+
+    const unassignedDocs = [];
+
+    let currentGroupId = null;
+
+    for (const guest of unassignedGuests) {
+
+      // Create a new group for every main guest
+      if (guest.guestNumber === 1) {
+        currentGroupId =
+          new mongoose.Types.ObjectId().toString();
+      }
+
+      unassignedDocs.push({
         sessionId,
+
+        groupId: currentGroupId,
 
         guestName: guest.guestName,
 
@@ -113,7 +131,8 @@ export const uploadGuests = async (req, res) => {
         generated: guest.generated,
 
         claimed: false,
-      }));
+      });
+    }
 
     //---------------------------------------
     // Save
@@ -171,6 +190,8 @@ export const uploadGuests = async (req, res) => {
     });
 
   } catch (error) {
+
+    console.error(error);
 
     if (
       req.file &&
