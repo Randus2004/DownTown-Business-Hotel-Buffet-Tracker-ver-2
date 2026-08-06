@@ -29,20 +29,10 @@ function GuestList({
     roomGuests.sort((a, b) => a.guestNumber - b.guestNumber);
   });
 
-  // Sort unassigned guests
-  unassigned.sort((a, b) => {
-    if (a.guestNumber !== b.guestNumber) {
-      return a.guestNumber - b.guestNumber;
-    }
-
-    return a.guestName.localeCompare(b.guestName);
-  });
-
   return (
     <div className="guest-list">
       <h2>Guests</h2>
 
-      {/* Room Cards */}
       {Object.entries(grouped).map(([roomNo, roomGuests]) => (
         <RoomCard
           key={roomNo}
@@ -55,7 +45,6 @@ function GuestList({
         />
       ))}
 
-      {/* Unassigned Guests */}
       {unassigned.length > 0 && (
         <UnassignedCard
           guests={unassigned}
