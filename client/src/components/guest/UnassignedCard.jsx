@@ -5,25 +5,22 @@ function UnassignedCard({
   onToggle,
   disabled = false,
 }) {
-  // Group by the main guest (guestNumber = 1)
-  const groups = [];
-  let currentGroup = null;
+
+  const grouped = {};
 
   guests.forEach((guest) => {
-    if (guest.guestNumber === 1) {
-      currentGroup = {
-        leader: guest,
-        guests: [guest],
-      };
 
-      groups.push(currentGroup);
-    } else if (currentGroup) {
-      currentGroup.guests.push(guest);
+    if (!grouped[guest.groupId]) {
+      grouped[guest.groupId] = [];
     }
+
+    grouped[guest.groupId].push(guest);
+
   });
 
   return (
     <div className="room-card">
+
       <div className="room-header">
         <h3>⚠️ Unassigned Guests</h3>
 
@@ -32,35 +29,54 @@ function UnassignedCard({
         </span>
       </div>
 
-      {groups.map((group) => (
-        <div
-          key={group.leader._id}
-          style={{
-            borderBottom: "1px solid #eee",
-            paddingBottom: "10px",
-            marginBottom: "10px",
-          }}
-        >
+      {Object.values(grouped).map((group) => {
+
+        group.sort(
+          (a, b) =>
+            a.guestNumber - b.guestNumber
+        );
+
+        const leader =
+          group.find(
+            (g) =>
+              g.guestNumber === 1
+          ) || group[0];
+
+        return (
           <div
+            key={leader.groupId}
             style={{
-              fontWeight: "bold",
-              color: "#444",
-              margin: "10px 0",
+              marginBottom: 18,
+              paddingBottom: 12,
+              borderBottom:
+                "1px solid #e5e5e5",
             }}
           >
-            👤 {group.leader.guestName}
-          </div>
 
-          {group.guests.map((guest) => (
-            <GuestItem
-              key={guest._id}
-              guest={guest}
-              onToggle={onToggle}
-              disabled={disabled}
-            />
-          ))}
-        </div>
-      ))}
+            <div
+              style={{
+                fontWeight: 700,
+                color: "#444",
+                marginBottom: 8,
+              }}
+            >
+              👤 {leader.guestName}
+            </div>
+
+            {group.map((guest) => (
+              <GuestItem
+                key={guest._id}
+                guest={guest}
+                onToggle={onToggle}
+                disabled={disabled}
+              />
+            ))}
+
+          </div>
+        );
+
+      })}
+
     </div>
   );
 }
