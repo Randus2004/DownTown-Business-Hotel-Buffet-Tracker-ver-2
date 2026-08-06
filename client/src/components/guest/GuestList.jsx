@@ -7,7 +7,7 @@ function GuestList({
   disabled = false,
 }) {
   const grouped = {};
-  const unassigned = [];
+  let unassigned = [];
 
   guests.forEach((guest) => {
     const roomNo = (guest.roomNo || "").trim();
@@ -21,6 +21,17 @@ function GuestList({
 
       grouped[roomNo].push(guest);
     }
+  });
+
+  // Sort unassigned guests
+  unassigned.sort((a, b) => {
+    // Main guests first
+    if (a.guestNumber !== b.guestNumber) {
+      return a.guestNumber - b.guestNumber;
+    }
+
+    // Then alphabetically
+    return a.guestName.localeCompare(b.guestName);
   });
 
   return (
