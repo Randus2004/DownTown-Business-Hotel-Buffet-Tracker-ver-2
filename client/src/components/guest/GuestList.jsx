@@ -1,4 +1,5 @@
 import RoomCard from "./RoomCard";
+import UnassignedCard from "./UnassignedCard";
 import "../../css/guest.css";
 
 function GuestList({
@@ -23,14 +24,17 @@ function GuestList({
     }
   });
 
+  // Sort room guests
+  Object.values(grouped).forEach((roomGuests) => {
+    roomGuests.sort((a, b) => a.guestNumber - b.guestNumber);
+  });
+
   // Sort unassigned guests
   unassigned.sort((a, b) => {
-    // Main guests first
     if (a.guestNumber !== b.guestNumber) {
       return a.guestNumber - b.guestNumber;
     }
 
-    // Then alphabetically
     return a.guestName.localeCompare(b.guestName);
   });
 
@@ -38,7 +42,7 @@ function GuestList({
     <div className="guest-list">
       <h2>Guests</h2>
 
-      {/* Normal Rooms */}
+      {/* Room Cards */}
       {Object.entries(grouped).map(([roomNo, roomGuests]) => (
         <RoomCard
           key={roomNo}
@@ -53,20 +57,11 @@ function GuestList({
 
       {/* Unassigned Guests */}
       {unassigned.length > 0 && (
-        <>
-          <h2 className="unassigned-title">
-            ⚠️ Unassigned Guests
-          </h2>
-
-          <RoomCard
-            room={{
-              roomNo: "UNASSIGNED",
-              guests: unassigned,
-            }}
-            onToggle={onToggle}
-            disabled={disabled}
-          />
-        </>
+        <UnassignedCard
+          guests={unassigned}
+          onToggle={onToggle}
+          disabled={disabled}
+        />
       )}
     </div>
   );
