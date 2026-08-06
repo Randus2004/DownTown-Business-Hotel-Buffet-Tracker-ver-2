@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import UnassignedGuest from "../models/UnassignedGuest.js";
 
 // Get all unassigned guests for a session
@@ -6,10 +7,12 @@ export const getUnassignedGuests = async (req, res) => {
     const guests = await UnassignedGuest.find({
       sessionId: req.params.sessionId,
     }).sort({
-      guestName: 1,
+      createdAt: 1,
+      guestNumber: 1,
     });
 
     res.json(guests);
+
   } catch (error) {
     res.status(500).json({
       message: error.message,
@@ -28,6 +31,9 @@ export const createUnassignedGuest = async (req, res) => {
       });
     }
 
+    // One group id for the whole booking
+    const groupId = new mongoose.Types.ObjectId().toString();
+
     const guests = [];
 
     const totalPax = Math.max(Number(pax) || 1, 1);
@@ -35,18 +41,26 @@ export const createUnassignedGuest = async (req, res) => {
     for (let i = 1; i <= totalPax; i++) {
       guests.push({
         sessionId,
-        guestName: i === 1 ? guestName : `Guest ${i}`,
+        groupId,
+        guestName:
+          i === 1
+            ? guestName
+            : `Guest ${i}`,
         guestNumber: i,
         generated: i > 1,
         claimed: false,
       });
     }
 
-    const createdGuests = await UnassignedGuest.insertMany(guests);
+    const createdGuests =
+      await UnassignedGuest.insertMany(
+        guests
+      );
 
     res.status(201).json({
       success: true,
-      message: "Unassigned guest added successfully.",
+      message:
+        "Unassigned guest added successfully.",
       guests: createdGuests,
     });
 
@@ -58,11 +72,17 @@ export const createUnassignedGuest = async (req, res) => {
 };
 
 // Update claim status
-export const updateUnassignedGuestStatus = async (req, res) => {
+export const updateUnassignedGuestStatus = async (
+  req,
+  res
+) => {
   try {
     const { claimed } = req.body;
 
-    const guest = await UnassignedGuest.findById(req.params.guestId);
+    const guest =
+      await UnassignedGuest.findById(
+        req.params.guestId
+      );
 
     if (!guest) {
       return res.status(404).json({
@@ -71,7 +91,9 @@ export const updateUnassignedGuestStatus = async (req, res) => {
     }
 
     guest.claimed = claimed;
-    guest.claimedAt = claimed ? new Date() : null;
+    guest.claimedAt = claimed
+      ? new Date()
+      : null;
 
     await guest.save();
 

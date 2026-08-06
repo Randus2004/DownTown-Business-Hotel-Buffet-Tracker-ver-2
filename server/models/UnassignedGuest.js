@@ -9,6 +9,13 @@ const unassignedGuestSchema = new mongoose.Schema(
       index: true,
     },
 
+    // NEW: groups one booking together
+    groupId: {
+      type: String,
+      required: true,
+      index: true,
+    },
+
     guestName: {
       type: String,
       required: true,
@@ -17,6 +24,7 @@ const unassignedGuestSchema = new mongoose.Schema(
 
     guestNumber: {
       type: Number,
+      required: true,
       default: 1,
     },
 
