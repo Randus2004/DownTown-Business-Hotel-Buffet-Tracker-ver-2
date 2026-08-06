@@ -5,7 +5,7 @@ function UnassignedCard({
   onToggle,
   disabled = false,
 }) {
-
+console.log(guests);
   const grouped = {};
 
   guests.forEach((guest) => {
@@ -22,7 +22,7 @@ function UnassignedCard({
     <div className="room-card">
 
       <div className="room-header">
-        <h3>⚠️ Unassigned Guests</h3>
+        <h3>Unassigned Guests</h3>
 
         <span>
           PAX : {guests.length}
