@@ -5,6 +5,8 @@ import SessionHeader from "../../components/session/SessionHeader";
 import SessionStats from "../../components/session/SessionStats";
 import UploadCard from "../../components/session/UploadCard";
 import StaffAccessCard from "../../components/session/StaffAccessCard";
+import SessionQRButton from "../../components/session/SessionQRButton";
+
 import GuestList from "../../components/guest/GuestList";
 import SearchBar from "../../components/guest/SearchBar";
 import ReportCard from "../../components/session/ReportCard";
@@ -12,6 +14,7 @@ import EndSessionCard from "../../components/session/EndSessionCard";
 import AddUnassignedModal from "../../components/session/AddUnassignedModal";
 
 import { getSession } from "../../services/sessionService";
+
 import {
   getGuests,
   updateGuestStatus,
@@ -32,6 +35,10 @@ function SessionDetails() {
   const [search, setSearch] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
 
+  //---------------------------------------
+  // Load Session + Guests
+  //---------------------------------------
+
   useEffect(() => {
     loadSession();
     loadGuests();
@@ -44,6 +51,10 @@ function SessionDetails() {
     return () => clearInterval(interval);
   }, [id]);
 
+  //---------------------------------------
+  // Load Session
+  //---------------------------------------
+
   const loadSession = async () => {
     try {
       const res = await getSession(id);
@@ -53,12 +64,17 @@ function SessionDetails() {
     }
   };
 
+  //---------------------------------------
+  // Load Guests
+  //---------------------------------------
+
   const loadGuests = async () => {
     try {
-      const [guestRes, unassignedRes] = await Promise.all([
-        getGuests(id),
-        getUnassignedGuests(id),
-      ]);
+      const [guestRes, unassignedRes] =
+        await Promise.all([
+          getGuests(id),
+          getUnassignedGuests(id),
+        ]);
 
       const mergedGuests = [
         ...guestRes.data,
@@ -76,9 +92,12 @@ function SessionDetails() {
     }
   };
 
+  //---------------------------------------
+  // Toggle Guest Claim
+  //---------------------------------------
+
   const handleToggle = async (guest) => {
     try {
-
       if (guest.roomNo === "") {
         await updateUnassignedGuestStatus(
           guest._id,
@@ -104,22 +123,37 @@ function SessionDetails() {
     }
   };
 
+  //---------------------------------------
+  // Loading
+  //---------------------------------------
+
   if (!session) {
     return <h2>Loading...</h2>;
   }
 
-  const filteredGuests = guests.filter((guest) => {
-    const keyword = search.toLowerCase();
+  //---------------------------------------
+  // Search
+  //---------------------------------------
 
-    return (
-      (guest.roomNo || "")
-        .toLowerCase()
-        .includes(keyword) ||
-      guest.guestName
-        .toLowerCase()
-        .includes(keyword)
-    );
-  });
+  const filteredGuests = guests.filter(
+    (guest) => {
+      const keyword =
+        search.toLowerCase();
+
+      return (
+        (guest.roomNo || "")
+          .toLowerCase()
+          .includes(keyword) ||
+        (guest.guestName || "")
+          .toLowerCase()
+          .includes(keyword)
+      );
+    }
+  );
+
+  //---------------------------------------
+  // UI
+  //---------------------------------------
 
   return (
     <div className="session-page">
@@ -128,6 +162,7 @@ function SessionDetails() {
 
       <SessionStats session={session} />
 
+      {/* Action Cards */}
       <div className="action-grid">
 
         <UploadCard
@@ -141,9 +176,18 @@ function SessionDetails() {
           }
         />
 
-        <StaffAccessCard session={session} />
+        {/* QR Button */}
+        <SessionQRButton
+          session={session}
+        />
 
-        <ReportCard sessionId={id} />
+        <StaffAccessCard
+          session={session}
+        />
+
+        <ReportCard
+          sessionId={id}
+        />
 
         <EndSessionCard
           session={session}
@@ -155,17 +199,22 @@ function SessionDetails() {
 
       </div>
 
+      {/* Search */}
       <SearchBar
         search={search}
         setSearch={setSearch}
       />
 
+      {/* Guests */}
       <GuestList
         guests={filteredGuests}
         onToggle={handleToggle}
-        disabled={session.status === "Closed"}
+        disabled={
+          session.status === "Closed"
+        }
       />
 
+      {/* Add Unassigned Modal */}
       <AddUnassignedModal
         open={showAddModal}
         sessionId={session._id}
