@@ -10,6 +10,150 @@
   font-size: 28px;
 }
 
+/* ========================================
+   STATUS CARDS
+======================================== */
+
+.staff-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 25px;
+}
+
+.staff-stat-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 110px;
+}
+
+.staff-stat-label {
+  font-size: 15px;
+  color: #6b7280;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.staff-stat-value {
+  font-size: 32px;
+  color: #1f2937;
+}
+
+/* ========================================
+   SEARCH
+======================================== */
+
+.staff-page .search-bar {
+  margin-bottom: 25px;
+}
+
+/* ========================================
+   SECTIONS
+======================================== */
+
+.staff-section {
+  margin-top: 30px;
+}
+
+.staff-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  margin-bottom: 15px;
+
+  color: #2c3e50;
+  font-size: 22px;
+}
+
+.staff-section-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 30px;
+  height: 30px;
+
+  padding: 0 8px;
+
+  border-radius: 20px;
+
+  background: #eef2ff;
+  color: #4f46e5;
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* ========================================
+   GUEST LIST
+======================================== */
+
 .staff-page .guest-list {
   margin-top: 20px;
-}   
+}
+
+/*
+  GuestList itself displays "Guests".
+  We don't need that heading twice inside
+  Pending / Served sections.
+*/
+
+.staff-section .guest-list > h2 {
+  display: none;
+}
+
+/* ========================================
+   EMPTY STATE
+======================================== */
+
+.staff-empty {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 25px;
+
+  text-align: center;
+
+  color: #6b7280;
+
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+}
+
+/* ========================================
+   MOBILE
+======================================== */
+
+@media (max-width: 768px) {
+  .staff-page {
+    padding: 20px;
+  }
+
+  .staff-page h1 {
+    font-size: 24px;
+  }
+
+  .staff-stats {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .staff-stat-card {
+    min-height: 90px;
+  }
+
+  .staff-stat-value {
+    font-size: 28px;
+  }
+
+  .staff-section h2 {
+    font-size: 20px;
+  }
+}
