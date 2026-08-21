@@ -205,14 +205,45 @@ function SessionDetails() {
         setSearch={setSearch}
       />
 
-      {/* Guests */}
-      <GuestList
-        guests={filteredGuests}
-        onToggle={handleToggle}
-        disabled={
-          session.status === "Closed"
-        }
-      />
+      {/* Pending Guests */}
+<div className="dashboard-section">
+  <h2>
+    Pending
+    <span className="dashboard-section-count">
+      {filteredGuests.filter(
+        (guest) => !guest.claimed
+      ).length}
+    </span>
+  </h2>
+
+  <GuestList
+    guests={filteredGuests.filter(
+      (guest) => !guest.claimed
+    )}
+    onToggle={handleToggle}
+    disabled={session.status === "Closed"}
+  />
+</div>
+
+{/* Served Guests */}
+<div className="dashboard-section">
+  <h2>
+    Served
+    <span className="dashboard-section-count">
+      {filteredGuests.filter(
+        (guest) => guest.claimed
+      ).length}
+    </span>
+  </h2>
+
+  <GuestList
+    guests={filteredGuests.filter(
+      (guest) => guest.claimed
+    )}
+    onToggle={handleToggle}
+    disabled={session.status === "Closed"}
+  />
+</div>
 
       {/* Add Unassigned Modal */}
       <AddUnassignedModal
