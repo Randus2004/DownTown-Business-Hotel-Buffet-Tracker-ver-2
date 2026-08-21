@@ -157,3 +157,15 @@
     font-size: 20px;
   }
 }
+
+/* Sticky Staff Stats */
+.staff-stats {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  background: #f5f6f8;
+  padding: 10px 0;
+
+  margin-bottom: 25px;
+}
