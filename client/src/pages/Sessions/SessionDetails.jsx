@@ -208,7 +208,7 @@ function SessionDetails() {
       {/* Pending Guests */}
 <div className="dashboard-section">
   <h2>
-    Pending
+    Pending{" "}
     <span className="dashboard-section-count">
       {filteredGuests.filter(
         (guest) => !guest.claimed
@@ -228,7 +228,7 @@ function SessionDetails() {
 {/* Served Guests */}
 <div className="dashboard-section">
   <h2>
-    Served
+    Served{" "}
     <span className="dashboard-section-count">
       {filteredGuests.filter(
         (guest) => guest.claimed
